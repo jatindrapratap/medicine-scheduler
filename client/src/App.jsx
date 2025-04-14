@@ -4,6 +4,7 @@ import Home from './pages/Home';
 import Login from './pages/Login';
 import Signup from './pages/Signup';
 import MedicineScheduler from './pages/MedicineScheduler';
+import { MedicineProvider } from './context/MedicineContext'; // Import the MedicineProvider
 
 const App = () => {
   return (
@@ -12,7 +13,14 @@ const App = () => {
         <Route path="/" element={<Home />} />
         <Route path="/login" element={<Login />} />
         <Route path="/signup" element={<Signup />} />
-        <Route path="/scheduler" element={<MedicineScheduler />} />
+        <Route 
+          path="/scheduler" 
+          element={
+            <MedicineProvider>
+              <MedicineScheduler />
+            </MedicineProvider>
+          } 
+        />
       </Routes>
     </Router>
   );
