@@ -1,0 +1,95 @@
+// src/components/LoginSignup.jsx
+import React, { useState } from 'react';
+import axios from 'axios';
+import { TextField, Button, Container, Typography, Snackbar } from '@mui/material';
+import { useNavigate } from 'react-router-dom';
+
+const LoginSignup = () => {
+    const [isLogin, setIsLogin] = useState(true);
+    const [username, setUsername] = useState('');
+    const [password, setPassword] = useState('');
+    const [error, setError] = useState('');
+    const navigate = useNavigate();
+
+    const handleLogin = async (e) => {
+        e.preventDefault();
+        if (!validateInput()) return; // Validate input before proceeding
+        try {
+            const response = await axios.post('http://localhost:5000/api/auth/login', { username, password });
+            localStorage.setItem('token', response.data.token);
+            navigate('/scheduler');
+        } catch (error) {
+            setError('Login failed. Please check your credentials.');
+        }
+    };
+
+    const handleSignup = async (e) => {
+        e.preventDefault();
+        if (!validateInput()) return; // Validate input before proceeding
+        try {
+            await axios.post('http://localhost:5000/api/auth/signup', { username, password });
+            setIsLogin(true); // Switch to login form after successful signup
+        } catch (error) {
+            setError('Signup failed. Please try again.');
+        }
+    };
+
+    const validateInput = () => {
+        if (username.length < 3) {
+            setError('Username must be at least 3 characters long.');
+            return false;
+        }
+        if (password.length < 6) {
+            setError('Password must be at least 6 characters long.');
+            return false;
+        }
+        return true;
+    };
+
+    return (
+        <Container className="flex flex-col items-center justify-center h-screen">
+            <Typography variant="h5" component="h1" gutterBottom>{isLogin ? 'Login' : 'Signup'}</Typography>
+            <form onSubmit={isLogin ? handleLogin : handleSignup} className="flex flex-col">
+                <TextField
+                    label="Username"
+                    value={username}
+                    onChange={(e) => setUsername(e.target.value)}
+                    className="mb-2"
+                    required
+                />
+                <TextField
+                    label="Password"
+                    type="password"
+                    value={password}
+                    onChange={(e) => setPassword(e.target.value)}
+                    className="mb-2"
+                    required />
+                <Button type="submit" variant="contained" color="primary" className="mb-2">
+                    {isLogin ? 'Login' : 'Signup'}
+                </Button>
+                <Button
+                    variant="text"
+                    onClick={() => setIsLogin(!isLogin)}
+                >
+                    {isLogin ? 'Don\'t have an account? Signup' : 'Already have an account? Login'}
+                </Button>
+            </form>
+            {error && (
+                <Snackbar
+                    open={!!error}
+                    autoHideDuration={6000}
+                    onClose={() => setError('')}
+                    message={error}
+                />
+            )}
+            <Typography variant="body2" color="textSecondary" className="mt-2">
+                <strong>Username Tips:</strong> Must be at least 3 characters long.
+            </Typography>
+            <Typography variant="body2" color="textSecondary">
+                <strong>Password Tips:</strong> Must be at least 6 characters long.
+            </Typography>
+        </Container>
+    );
+};
+
+export default LoginSignup;

@@ -1,21 +1,25 @@
+// App.js
 import React from 'react';
-import { BrowserRouter as Router, Route, Routes } from 'react-router-dom';
-import Home from './pages/Home';
-import Login from './pages/Login';
-import Signup from './pages/Signup';
-import MedicineScheduler from './pages/MedicineScheduler';
+import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
+import MedicineScheduler from './pages/MedicineScheduler'; // Import your MedicineScheduler component
+import LoginSignup from './pages/LoginSignup'; // Import the combined Login/Signup component
+import { MedicineProvider } from './context/MedicineContext'; // Import the MedicineProvider
 
 const App = () => {
-  return (
-    <Router>
-      <Routes>
-        <Route path="/" element={<Home />} />
-        <Route path="/login" element={<Login />} />
-        <Route path="/signup" element={<Signup />} />
-        <Route path="/scheduler" element={<MedicineScheduler />} />
-      </Routes>
-    </Router>
-  );
+    const isAuthenticated = !!localStorage.getItem('token'); // Check if the user is authenticated
+
+    return (
+        <MedicineProvider>
+            <Router>
+                <Routes>
+                    <Route path="/" element={<Navigate to="/scheduler" />} />
+                    <Route path="/login" element={<LoginSignup />} />
+                    <Route path="/signup" element={<LoginSignup />} />
+                    <Route path="/scheduler" element={<MedicineScheduler/>} />
+                </Routes>
+            </Router>
+        </MedicineProvider>
+    );
 };
 
 export default App;

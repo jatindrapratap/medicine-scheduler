@@ -7,7 +7,8 @@ const MedicineSchema = new mongoose.Schema({
     durationDays: { type: Number, required: true },
     startDate: { type: Date, required: true },
     endDate: { type: Date },
-    userId: { type: mongoose.Schema.Types.ObjectId, ref: 'User ' }
+    userId: { type: mongoose.Schema.Types.ObjectId, ref: 'User ' },
+    timeSlots: {type: [String], required: true}
 });
 
 module.exports = mongoose.model('Medicine', MedicineSchema);
