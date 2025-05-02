@@ -1,5 +1,6 @@
 // MedicineContext.js
 import React, { createContext, useState, useEffect } from 'react';
+const apiUrl = import.meta.env.VITE_MEDICINE_SCHEDULER_MEDICINES_API;
 import axios from 'axios';
 
 export const MedicineContext = createContext();
@@ -10,6 +11,7 @@ export const MedicineProvider = ({ children }) => {
 
     useEffect(() => {
         fetchMedicines();
+        // console.log(userToken)
     }, []);
 
     const fetchMedicines = async () => {
@@ -24,7 +26,7 @@ export const MedicineProvider = ({ children }) => {
         }
 
         try {
-            const response = await axios.get('http://localhost:5000/api/medicines', {
+            const response = await axios.get(apiUrl, {
                 headers: { Authorization: `Bearer ${userToken}` }
             });
             setMedicines(response.data);
@@ -35,7 +37,7 @@ export const MedicineProvider = ({ children }) => {
 
     const addMedicine = async (newMedicine) => {
         try {
-            await axios.post('http://localhost:5000/api/medicines', newMedicine, {
+            await axios.post(apiUrl, newMedicine, {
                 headers: { Authorization: `Bearer ${userToken}` }
             });
             console.log(newMedicine)
@@ -47,7 +49,7 @@ export const MedicineProvider = ({ children }) => {
 
     const deleteMedicine = async (id) => {
         try {
-            await axios.delete(`http://localhost:5000/api/medicines/${id}`, {
+            await axios.delete(`${apiUrl}/${id}`, {
                 headers: { Authorization: `Bearer ${userToken}` }
             });
             fetchMedicines();

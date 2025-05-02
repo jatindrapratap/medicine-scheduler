@@ -1,62 +1,72 @@
-// MedicineList.js
-import React, { useContext } from 'react';
+import React, { useMemo, useContext } from 'react';
 import { Card, CardContent, CardActions, Typography, Button, Grid } from '@mui/material';
 import { MedicineContext } from '../context/MedicineContext';
 
 const MedicineList = ({ selectedDate, handleOpenInfoModal }) => {
-    const { medicines } = useContext(MedicineContext);
+    const { medicines, deleteMedicine } = useContext(MedicineContext);
+    // console.log("medicines:", medicines);
 
-    // Filter medicines based on the selected date
-    const filteredMedicines = medicines.filter(medicine => {
-        const startDate = new Date(medicine.startDate);
-        const endDate = medicine.endDate ? new Date(medicine.endDate) : null;
-        return (
-            selectedDate >= startDate && 
-            (!endDate || selectedDate <= endDate)
-        );
-    });
+    // Memoize filtered medicines based on the selected date
+    const filteredMedicines = useMemo(() => {
+        return medicines.filter(medicine => {
+            const startDate = new Date(medicine.startDate);
+            // console.log("Start Date:", startDate.getTime());
+
+            // Check if startDate is valid
+            if (isNaN(startDate.getTime())) {
+                console.error("Invalid startDate:", medicine.startDate);
+                return false; // Skip this medicine if the start date is invalid
+            }
+
+            const durationDays = Number(medicine.durationDays);
+            // console.log("Duration Days:", durationDays);
+
+            const endDate = new Date(startDate);
+            endDate.setDate(startDate.getDate() + durationDays - 1);
+            // console.log("End Date:", endDate);
+
+            // Ensure selectedDate is a Date object
+            const selectedDateObj = new Date(selectedDate);
+            // console.log("selected date:", selectedDateObj)
+            if (isNaN(selectedDateObj.getTime())) {
+                console.error("Invalid selectedDate:", selectedDate);
+                return false; // Skip this medicine if the selected date is invalid
+            }
+
+            return (
+                selectedDateObj.getDate() >= startDate.getDate() &&
+                selectedDateObj.getDate() <= endDate.getDate()
+            );
+        });
+    }, [medicines, selectedDate]); // Dependencies for useMemo
+
+    // console.log("filteredMedicines", filteredMedicines);
 
     return (
-        <Grid container spacing={2}>
-            {filteredMedicines.length > 0 ? (
+        <div>
+            {filteredMedicines.length > 0 ? ( // Check length instead of truthiness
                 filteredMedicines.map((medicine) => (
-                    <Grid item xs={12} sm={6} md={4} key={medicine._id}>
-                        <Card variant="outlined" sx={{ transition: '0.3s', '&:hover': { boxShadow: 3 } }}>
-                            <CardContent>
-                                <Typography variant="h6" component="div">
-                                    {medicine.name}
-                                </Typography>
-                                <Typography color="text.secondary">
-                                    Times per Day: {medicine.timesPerDay}
-                                </Typography>
-                                <Typography color="text.secondary">
-                                    Duration: {medicine.durationDays} days
-                                </Typography>
-                                <Typography color="text.secondary">
-                                    Start Date: {new Date(medicine.startDate).toLocaleDateString()}
-                                </Typography>
-                                <Typography color="text.secondary">
-                                    End Date: {medicine.endDate ? new Date(medicine.endDate).toLocaleDateString() : 'N/A'}
-                                </Typography>
-                                <Typography color="text.secondary">
-                                    Time Slots: {medicine.timeSlots.join(', ')}
-                                </Typography>
-                            </CardContent>
-                            <CardActions>
-                                <Button size="small" onClick={() => handleOpenInfoModal(medicine)}>
-                                    View Details
-                                </Button>
-                                {/* Add more action buttons as needed */}
-                            </CardActions>
-                        </Card>
-                    </Grid>
+                    <div key={medicine._id}> {/* Ensure each item has a unique key */}
+                        <p>
+                            {medicine.name}
+                        </p>
+                        <div>
+                            Time Slots: {medicine.timeSlots.join(', ')}
+                        </div>
+                        <Button size="small" onClick={() => handleOpenInfoModal(medicine)}>
+                            View Details
+                        </Button>
+                        <Button onClick={() => deleteMedicine(medicine._id)}>
+                            Delete
+                        </Button>
+                    </div>
                 ))
             ) : (
                 <Typography variant="body1" color="text.secondary">
                     No medicines scheduled for this date.
                 </Typography>
             )}
-        </Grid>
+        </div>
     );
 };
 

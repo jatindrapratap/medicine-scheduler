@@ -11,15 +11,28 @@ const TopBar = () => {
         navigate('/login'); // Redirect to login page
     };
 
+    const isAuthenticated = !!localStorage.getItem('token'); // Check if the user is authenticated
+
     return (
         <AppBar position="static">
             <Toolbar>
                 <Typography variant="h6" style={{ flexGrow: 1 }}>
                     Medicine Scheduler
                 </Typography>
-                <Button color="inherit" onClick={handleLogout}>
-                    Logout
-                </Button>
+                {isAuthenticated ? (
+                    <Button color="inherit" onClick={handleLogout}>
+                        Logout
+                    </Button>
+                ) : (
+                    <>
+                        <Button color="inherit" onClick={() => navigate('/login')}>
+                            Login
+                        </Button>
+                        <Button color="inherit" onClick={() => navigate('/signup')}>
+                            Signup
+                        </Button>
+                    </>
+                )}
             </Toolbar>
         </AppBar>
     );
