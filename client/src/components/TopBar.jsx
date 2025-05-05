@@ -2,16 +2,16 @@
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import { AppBar, Toolbar, Typography, Button } from '@mui/material';
+import { MedicineContext } from '../context/MedicineContext';
+import { useContext} from 'react'
 
 const TopBar = () => {
     const navigate = useNavigate();
-
-    const handleLogout = () => {
-        localStorage.removeItem('token'); // Clear the token
-        navigate('/login'); // Redirect to login page
-    };
-
     const isAuthenticated = !!localStorage.getItem('token'); // Check if the user is authenticated
+    const { logout } = useContext(MedicineContext);
+    const handleLogout = () => {
+        logout();
+    };
 
     return (
         <AppBar position="static">
