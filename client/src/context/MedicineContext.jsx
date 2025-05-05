@@ -7,37 +7,41 @@ export const MedicineContext = createContext();
 
 export const MedicineProvider = ({ children }) => {
     const [medicines, setMedicines] = useState([]);
-    const userToken = localStorage.getItem('token');
+    const [userToken, setUserToken] = useState(localStorage.getItem('token'));
+    const mockMedicines = [
+        { _id: '1', name: 'Aspirin', timesPerDay: 2, durationDays: 5, startDate: new Date(), endDate: null, timeSlots: ['08:00', '20:00'], description: 'Take after meals.' },
+        { _id: '2', name: 'Ibuprofen', timesPerDay: 3, durationDays: 7, startDate: new Date(), endDate: null, timeSlots: ['09:00', '15:00', '21:00'], description: '' },
+    ];
 
     useEffect(() => {
         fetchMedicines();
         // console.log(userToken)
-    }, []);
+        console.log("here")
+    }, [userToken]);
 
     const fetchMedicines = async () => {
-        if (!userToken) {
-            // Load mock data for demo
-            const mockMedicines = [
-                { _id: '1', name: 'Aspirin', timesPerDay: 2, durationDays: 5, startDate: new Date(), endDate: null, timeSlots: ['08:00', '20:00'], description: 'Take after meals.' },
-                { _id: '2', name: 'Ibuprofen', timesPerDay: 3, durationDays: 7, startDate: new Date(), endDate: null, timeSlots: ['09:00', '15:00', '21:00'], description: '' },
-            ];
-            setMedicines(mockMedicines);
-            return;
-        }
-
+        
         try {
-            const response = await axios.get(apiUrl, {
+            const response = await axios.get(`${apiUrl}/medicines`, {
                 headers: { Authorization: `Bearer ${userToken}` }
             });
             setMedicines(response.data);
         } catch (error) {
+            if (!userToken) {
+                // Load mock data for demo
+                
+                setMedicines(mockMedicines);
+                return;
+            }
             console.error('Error fetching medicines:', error);
         }
+        
+
     };
 
     const addMedicine = async (newMedicine) => {
         try {
-            await axios.post(apiUrl, newMedicine, {
+            await axios.post(`${apiUrl}/medicines`, newMedicine, {
                 headers: { Authorization: `Bearer ${userToken}` }
             });
             console.log(newMedicine)
@@ -49,7 +53,7 @@ export const MedicineProvider = ({ children }) => {
 
     const deleteMedicine = async (id) => {
         try {
-            await axios.delete(`${apiUrl}/${id}`, {
+            await axios.delete(`${apiUrl}/medicines/${id}`, {
                 headers: { Authorization: `Bearer ${userToken}` }
             });
             fetchMedicines();
@@ -58,8 +62,19 @@ export const MedicineProvider = ({ children }) => {
         }
     };
 
+    const logout = () => {
+        localStorage.removeItem('token');
+        setUserToken(null)
+        setMedicines(mockMedicines)
+    }
+
+    const setToken = () => {
+        setUserToken(localStorage.getItem('token'))
+    }
+
+
     return (
-        <MedicineContext.Provider value={{ medicines, addMedicine, deleteMedicine }}>
+        <MedicineContext.Provider value={{ medicines, addMedicine, deleteMedicine, logout, setToken }}>
             {children}
         </MedicineContext.Provider>
     );

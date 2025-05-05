@@ -1,10 +1,13 @@
 // src/components/LoginSignup.jsx
-import React, { useState } from 'react';
+import React, { useState, useContext } from 'react';
 import axios from 'axios';
 import { TextField, Button, Container, Typography, Snackbar } from '@mui/material';
 import { useNavigate } from 'react-router-dom';
+import { MedicineContext } from '../context/MedicineContext';
+const apiUrl = import.meta.env.VITE_MEDICINE_SCHEDULER_MEDICINES_API;
 
 const LoginSignup = () => {
+    const { setToken } = useContext(MedicineContext);
     const [isLogin, setIsLogin] = useState(true);
     const [username, setUsername] = useState('');
     const [password, setPassword] = useState('');
@@ -15,11 +18,13 @@ const LoginSignup = () => {
         e.preventDefault();
         if (!validateInput()) return; // Validate input before proceeding
         try {
-            const response = await axios.post('http://localhost:5000/api/auth/login', { username, password });
+            const response = await axios.post(`${apiUrl}/auth/login`, { username, password });
             localStorage.setItem('token', response.data.token);
+            setToken();
             navigate('/scheduler');
         } catch (error) {
             setError('Login failed. Please check your credentials.');
+            console.log(error)
         }
     };
 
@@ -27,7 +32,7 @@ const LoginSignup = () => {
         e.preventDefault();
         if (!validateInput()) return; // Validate input before proceeding
         try {
-            await axios.post('http://localhost:5000/api/auth/signup', { username, password });
+            await axios.post(`${apiUrl}/auth/signup`, { username, password });
             setIsLogin(true); // Switch to login form after successful signup
         } catch (error) {
             setError('Signup failed. Please try again.');
