@@ -40,6 +40,42 @@ router.get('/', async (req, res) => {
     }
 });
 
+// Update consumption record for a medicine
+router.put('/:id/consumption', async (req, res) => {
+    const medicineId = req.params.id;
+    const { date, timeSlot, consumed } = req.body;
+
+    if (!date || !timeSlot || typeof consumed !== 'boolean') {
+        return res.status(400).json({ message: 'Missing or invalid fields in request body' });
+    }
+
+    try {
+        const medicine = await Medicine.findOne({ _id: medicineId, userId: req.user.id });
+        if (!medicine) {
+            return res.status(404).json({ message: 'Medicine not found' });
+        }
+
+        // Find existing consumption record
+        const recordIndex = medicine.consumptionRecords.findIndex(record =>
+            record.date.toISOString().slice(0,10) === new Date(date).toISOString().slice(0,10) &&
+            record.timeSlot === timeSlot
+        );
+
+        if (recordIndex !== -1) {
+            // Update existing record
+            medicine.consumptionRecords[recordIndex].consumed = consumed;
+        } else {
+            // Add new record
+            medicine.consumptionRecords.push({ date: new Date(date), timeSlot, consumed });
+        }
+
+        await medicine.save();
+        res.json(medicine);
+    } catch (error) {
+        res.status(500).json({ message: 'Error updating consumption record', error });
+    }
+});
+
 // Delete a medicine by ID
 router.delete('/:id', async (req, res) => {
     try {
