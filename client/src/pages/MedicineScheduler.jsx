@@ -1,12 +1,12 @@
-// MedicineScheduler.js
-import React, { useState, useContext } from 'react';
-import { Button } from '@mui/material';
+import React, { useState, useContext, useMemo } from 'react';
+import { Button, Container, Box, useMediaQuery } from '@mui/material';
 import TopBar from '../components/TopBar';
 import { MedicineContext } from '../context/MedicineContext';
 import MedicineList from '../components/MedicineList';
 import AddMedicineDialog from '../components/AddMedicineDialog';
 import MedicineInfoModal from '../components/MedicineInfoModal';
 import CalendarComponent from '../components/CalendarComponent';
+import { useTheme } from '@mui/material/styles';
 
 const MedicineScheduler = () => {
     const { medicines } = useContext(MedicineContext);
@@ -14,6 +14,9 @@ const MedicineScheduler = () => {
     const [selectedDate, setSelectedDate] = useState(new Date());
     const [infoModalOpen, setInfoModalOpen] = useState(false);
     const [selectedMedicine, setSelectedMedicine] = useState(null);
+
+    const theme = useTheme();
+    const isSmallScreen = useMediaQuery('(max-width:700px)');
 
     const handleOpen = () => {
         setOpen(true);
@@ -33,53 +36,63 @@ const MedicineScheduler = () => {
         setSelectedMedicine(null);
     };
 
-    const getCalendarEvents = () => {
-        return medicines.flatMap(medicine => {
-            const events = [];
+    const calendarEvents = useMemo(() => {
+        const events = medicines.flatMap(medicine => {
+            const eventDates = [];
             const start = new Date(medicine.startDate);
             const duration = medicine.durationDays;
 
             for (let i = 0; i < duration; i++) {
-                const eventDate = new Date(start);
-                eventDate.setDate(start.getDate() + i);
-                events.push(eventDate.toDateString());
+                const eventDate = new Date(start.getTime());
+                eventDate.setDate(eventDate.getDate() + i);
+                eventDates.push(eventDate.toISOString().split('T')[0]); // ISO date string YYYY-MM-DD
             }
-            return events;
+            return eventDates;
         });
-    };
-
-    const calendarEvents = getCalendarEvents();
+        return events;
+    }, [medicines]);
 
     return (
-        <div className="p-4">
-            <TopBar /> {/* Include the TopBar here */}
-            <div className='my-1'>
-                <CalendarComponent
-                    selectedDate={selectedDate}
-                    setSelectedDate={setSelectedDate}
-                    calendarEvents={calendarEvents}
-                />
-            </div>
+        <>
+            <TopBar />
+            <Container maxWidth="lg" sx={{ mt: 4, mb: 4 }}>
+                <Box
+                    display="flex"
+                    flexDirection={isSmallScreen ? 'column' : 'row'}
+                    gap={4}
+                >
+                    <Box flex={1}>
+                        <CalendarComponent
+                            selectedDate={selectedDate}
+                            setSelectedDate={setSelectedDate}
+                            calendarEvents={calendarEvents}
+                        />
+                    </Box>
+                    <Box flex={1} display="flex" flexDirection="column">
+                        <Box mb={3} display="flex" justifyContent="flex-end">
+                            <Button variant="contained" color="primary" onClick={handleOpen}>
+                                Add Medicine
+                            </Button>
+                        </Box>
+                        <MedicineList
+                            selectedDate={selectedDate}
+                            handleOpenInfoModal={handleOpenInfoModal}
+                        />
+                    </Box>
+                </Box>
 
-            <div className='my-1'>
-                <Button variant="contained" color="primary" onClick={handleOpen}>
-                    Add Medicine
-                </Button>
-            </div>
-            <MedicineList
-                selectedDate={selectedDate}
-                handleOpenInfoModal={handleOpenInfoModal}
-            />
-            <AddMedicineDialog
-                open={open}
-                handleClose={handleClose}
-            />
-            <MedicineInfoModal
-                open={infoModalOpen}
-                handleClose={handleCloseInfoModal}
-                selectedMedicine={selectedMedicine}
-            />
-        </div>
+                <AddMedicineDialog
+                    open={open}
+                    handleClose={handleClose}
+                />
+
+                <MedicineInfoModal
+                    open={infoModalOpen}
+                    handleClose={handleCloseInfoModal}
+                    selectedMedicine={selectedMedicine}
+                />
+            </Container>
+        </>
     );
 };
 

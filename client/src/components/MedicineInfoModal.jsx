@@ -1,33 +1,40 @@
-// MedicineInfoModal.js
 import React from 'react';
-import { Button, Dialog, DialogActions, DialogContent, DialogTitle } from '@mui/material';
+import { Dialog, DialogTitle, DialogContent, DialogActions, Button, Typography, Divider } from '@mui/material';
 
 const MedicineInfoModal = ({ open, handleClose, selectedMedicine }) => {
-  return (
-    <Dialog open={open} onClose={handleClose}>
-      <DialogTitle>{selectedMedicine ? selectedMedicine.name : 'Medicine Details'}</DialogTitle>
-      <DialogContent>
-        {selectedMedicine ? (
-          <>
-            <p><strong>Times Per Day:</strong> {selectedMedicine.timesPerDay}</p>
-            <p><strong>Duration (Days):</strong> {selectedMedicine.durationDays}</p>
-            <p><strong>Start Date:</strong> {new Date(selectedMedicine.startDate).toLocaleDateString()}</p>
-            <p><strong>End Date:</strong> {selectedMedicine.endDate ? new Date(selectedMedicine.endDate).toLocaleDateString() : 'N/A'}</p>
-            {/* <p><strong>Time Slots:</strong> {selectedMedicine.timeSlots}</p> */}
-            <p><strong>Time Slots:</strong> {selectedMedicine.timeSlots.join(', ')}</p>
-            <p><strong>Description:</strong> {selectedMedicine.description || 'No description provided.'}</p>
-          </>
-        ) : (
-          <p>No details available.</p>
-        )}
-      </DialogContent>
-      <DialogActions>
-        <Button onClick={handleClose} color="primary">
-          Close
-        </Button>
-      </DialogActions>
-    </Dialog>
-  );
+    if (!selectedMedicine) return null;
+
+    return (
+        <Dialog open={open} onClose={handleClose} aria-labelledby="medicine-info-title" maxWidth="sm" fullWidth>
+            <DialogTitle id="medicine-info-title">{selectedMedicine.name}</DialogTitle>
+            <Divider />
+            <DialogContent dividers>
+                <Typography variant="body1" gutterBottom>
+                    <strong>Times per day:</strong> {selectedMedicine.timesPerDay}
+                </Typography>
+                <Typography variant="body1" gutterBottom>
+                    <strong>Duration (days):</strong> {selectedMedicine.durationDays}
+                </Typography>
+                <Typography variant="body1" gutterBottom>
+                    <strong>Start Date:</strong> {new Date(selectedMedicine.startDate).toLocaleDateString()}
+                </Typography>
+                <Typography variant="body1" gutterBottom>
+                    <strong>End Date:</strong> {selectedMedicine.endDate ? new Date(selectedMedicine.endDate).toLocaleDateString() : 'N/A'}
+                </Typography>
+                <Typography variant="body1" gutterBottom>
+                    <strong>Time Slots:</strong> {selectedMedicine.timeSlots.join(', ')}
+                </Typography>
+                <Typography variant="body1" gutterBottom>
+                    <strong>Description:</strong> {selectedMedicine.description || 'No description provided.'}
+                </Typography>
+            </DialogContent>
+            <DialogActions>
+                <Button onClick={handleClose} color="primary" variant="contained">
+                    Close
+                </Button>
+            </DialogActions>
+        </Dialog>
+    );
 };
 
 export default MedicineInfoModal;
