@@ -25,6 +25,7 @@ export const MedicineProvider = ({ children }) => {
             const response = await axios.get(`${apiUrl}/medicines`, {
                 headers: { Authorization: `Bearer ${userToken}` }
             });
+            console.log('Fetched medicines:', response.data); // Debugging
             setMedicines(response.data);
         } catch (error) {
             if (!userToken) {

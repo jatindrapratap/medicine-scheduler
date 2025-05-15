@@ -1,5 +1,5 @@
 // AddMedicineDialog.js
-import React, { useState, useContext } from 'react';
+import React, { useState, useContext, useEffect } from 'react';
 import { Button, TextField, Dialog, DialogActions, DialogContent, DialogTitle, Tooltip, IconButton } from '@mui/material';
 import InfoIcon from '@mui/icons-material/Info';
 import { MedicineContext } from '../context/MedicineContext';
@@ -14,7 +14,10 @@ const AddMedicineDialog = ({ open, handleClose }) => {
     const [endDate, setEndDate] = useState(null);
     const [description, setDescription] = useState('');
     const [timeSlots, setTimeSlots] = useState([]);
-    const [error, setError] = useState(''); 
+    const [error, setError] = useState('');
+    const [isUpdatingDuration, setIsUpdatingDuration] = useState(false);
+    const [isUpdatingEndDate, setIsUpdatingEndDate] = useState(false);
+
     const handleAddMedicine = () => {
         // Validate input
         if (!name || !timesPerDay || !durationDays || !startDate) {
@@ -45,6 +48,36 @@ const AddMedicineDialog = ({ open, handleClose }) => {
         setTimesPerDay(times);
         setTimeSlots(getSuggestedTimeSlots(times)); // Update time slots based on new value
     };
+
+    // Update endDate when durationDays or startDate changes, if not updating endDate directly
+    useEffect(() => {
+        if (isUpdatingEndDate) {
+            setIsUpdatingEndDate(false);
+            return;
+        }
+        if (durationDays && startDate) {
+            setIsUpdatingDuration(true);
+            const newEndDate = new Date(startDate);
+            newEndDate.setDate(newEndDate.getDate() + Number(durationDays) - 1);
+            setEndDate(newEndDate);
+            setIsUpdatingDuration(false);
+        }
+    }, [durationDays, startDate]);
+
+    // Update durationDays when endDate or startDate changes, if not updating durationDays directly
+    useEffect(() => {
+        if (isUpdatingDuration) {
+            setIsUpdatingDuration(false);
+            return;
+        }
+        if (endDate && startDate) {
+            setIsUpdatingEndDate(true);
+            const diffTime = endDate.getTime() - startDate.getTime();
+            const diffDays = Math.floor(diffTime / (1000 * 60 * 60 * 24)) + 1;
+            setDurationDays(diffDays > 0 ? diffDays : 1);
+            setIsUpdatingEndDate(false);
+        }
+    }, [endDate, startDate]);
 
     return (
         <Dialog open={open} onClose={handleClose}>
@@ -95,17 +128,6 @@ const AddMedicineDialog = ({ open, handleClose }) => {
                 ))}
                 <TextField
                     margin="dense"
-                    label="Duration (Days)"
-                    type="number"
-                    fullWidth
-                    value={durationDays}
-                    onChange={(e) => {
-                        setDurationDays(e.target.value);
-                        setError(''); // Clear error on input change
-                    }}
-                />
-                <TextField
-                    margin="dense"
                     label="Start Date"
                     type="date"
                     fullWidth
@@ -115,9 +137,27 @@ const AddMedicineDialog = ({ open, handleClose }) => {
                         setError(''); // Clear error on input change
                     }}
                 />
+                <div style={{ display: 'flex', alignItems: 'center' }}>
+                    <TextField
+                        margin="dense"
+                        label="Duration (Days)"
+                        type="number"
+                        fullWidth
+                        value={durationDays}
+                        onChange={(e) => {
+                            setDurationDays(e.target.value);
+                            setError(''); // Clear error on input change
+                        }}
+                    />
+                    <Tooltip title="End date will be automatically calculated based on the start date and duration. You can also set it manually if needed.">
+                        <IconButton>
+                            <InfoIcon />
+                        </IconButton>
+                    </Tooltip>
+                </div>
                 <TextField
                     margin="dense"
-                    label="End Date (Optional)"
+                    label="End Date (Auto-Calculated)"
                     type="date"
                     fullWidth
                     value={endDate ? endDate.toISOString().split('T')[0] : ''}

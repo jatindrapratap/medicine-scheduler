@@ -27,11 +27,16 @@ const MedicineList = ({ selectedDate, handleOpenInfoModal }) => {
       const endDate = new Date(startDate);
       endDate.setDate(startDate.getDate() + durationDays - 1);
 
+      // Normalize dates to midnight for accurate date-only comparison
+      startDate.setHours(0, 0, 0, 0);
+      endDate.setHours(0, 0, 0, 0);
+
       const selectedDateObj = new Date(selectedDate);
       if (isNaN(selectedDateObj.getTime())) {
         console.error("Invalid selectedDate:", selectedDate);
         return false;
       }
+      selectedDateObj.setHours(0, 0, 0, 0);
 
       return selectedDateObj >= startDate && selectedDateObj <= endDate;
     });
