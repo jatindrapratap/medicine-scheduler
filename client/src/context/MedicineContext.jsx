@@ -25,6 +25,7 @@ export const MedicineProvider = ({ children }) => {
             const response = await axios.get(`${apiUrl}/medicines`, {
                 headers: { Authorization: `Bearer ${userToken}` }
             });
+            console.log('Fetched medicines:', response.data); // Debugging
             setMedicines(response.data);
         } catch (error) {
             if (!userToken) {
@@ -74,7 +75,7 @@ export const MedicineProvider = ({ children }) => {
 
 
     return (
-        <MedicineContext.Provider value={{ medicines, addMedicine, deleteMedicine, logout, setToken }}>
+        <MedicineContext.Provider value={{ medicines, setMedicines, addMedicine, deleteMedicine, logout, setToken, userToken }}>
             {children}
         </MedicineContext.Provider>
     );
