@@ -1,4 +1,3 @@
-// MedicineContext.js
 import React, { createContext, useState, useEffect } from 'react';
 const apiUrl = import.meta.env.VITE_MEDICINE_SCHEDULER_MEDICINES_API;
 import axios from 'axios';
@@ -8,6 +7,7 @@ export const MedicineContext = createContext();
 export const MedicineProvider = ({ children }) => {
     const [medicines, setMedicines] = useState([]);
     const [userToken, setUserToken] = useState(localStorage.getItem('token'));
+    const [loading, setLoading] = useState(false);
     const mockMedicines = [
         { _id: '1', name: 'Aspirin', timesPerDay: 2, durationDays: 5, startDate: new Date(), endDate: null, timeSlots: ['08:00', '20:00'], description: 'Take after meals.' },
         { _id: '2', name: 'Ibuprofen', timesPerDay: 3, durationDays: 7, startDate: new Date(), endDate: null, timeSlots: ['09:00', '15:00', '21:00'], description: '' },
@@ -15,29 +15,26 @@ export const MedicineProvider = ({ children }) => {
 
     useEffect(() => {
         fetchMedicines();
-        // console.log(userToken)
         console.log("here")
     }, [userToken]);
 
     const fetchMedicines = async () => {
-        
+        setLoading(true);
         try {
             const response = await axios.get(`${apiUrl}/medicines`, {
                 headers: { Authorization: `Bearer ${userToken}` }
             });
-            console.log('Fetched medicines:', response.data); // Debugging
+            console.log('Fetched medicines:', response.data);
             setMedicines(response.data);
         } catch (error) {
             if (!userToken) {
-                // Load mock data for demo
-                
                 setMedicines(mockMedicines);
+                setLoading(false);
                 return;
             }
             console.error('Error fetching medicines:', error);
         }
-        
-
+        setLoading(false);
     };
 
     const addMedicine = async (newMedicine) => {
@@ -73,9 +70,8 @@ export const MedicineProvider = ({ children }) => {
         setUserToken(localStorage.getItem('token'))
     }
 
-
     return (
-        <MedicineContext.Provider value={{ medicines, setMedicines, addMedicine, deleteMedicine, logout, setToken, userToken }}>
+        <MedicineContext.Provider value={{ medicines, setMedicines, addMedicine, deleteMedicine, logout, setToken, userToken, loading }}>
             {children}
         </MedicineContext.Provider>
     );
