@@ -1,4 +1,3 @@
-// AddMedicineDialog.js
 import React, { useState, useContext, useEffect } from 'react';
 import { Button, TextField, Dialog, DialogActions, DialogContent, DialogTitle, Tooltip, IconButton } from '@mui/material';
 import InfoIcon from '@mui/icons-material/Info';
@@ -22,6 +21,11 @@ const AddMedicineDialog = ({ open, handleClose }) => {
         // Validate input
         if (!name || !timesPerDay || !durationDays || !startDate) {
             setError('Please fill in all required fields.');
+            return;
+        }
+        // Validate timeSlots: must not be empty and no empty strings
+        if (!timeSlots.length || timeSlots.some(slot => !slot || slot.trim() === '')) {
+            setError('Please provide valid time slots.');
             return;
         }
 
