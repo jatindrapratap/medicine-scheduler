@@ -1,5 +1,5 @@
 import React, { useMemo, useContext, useState, useEffect } from 'react';
-import { Card, CardContent, CardActions, Typography, Button, Stack, Checkbox, FormControlLabel, Dialog, DialogTitle, DialogContent, DialogContentText, DialogActions } from '@mui/material';
+import { Card, CardContent, Typography, Button, Stack, Checkbox, FormControlLabel, Dialog, DialogTitle, DialogContent, DialogContentText, DialogActions, CircularProgress, Box } from '@mui/material';
 import AccessTimeIcon from '@mui/icons-material/AccessTime';
 import axios from 'axios';
 import { MedicineContext } from '../context/MedicineContext';
@@ -7,7 +7,7 @@ import { MedicineContext } from '../context/MedicineContext';
 const apiUrl = import.meta.env.VITE_MEDICINE_SCHEDULER_MEDICINES_API;
 
 const MedicineList = ({ selectedDate, handleOpenInfoModal }) => {
-  const { medicines, deleteMedicine, setMedicines, userToken } = useContext(MedicineContext);
+  const { medicines, deleteMedicine, setMedicines, userToken, loading } = useContext(MedicineContext);
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const [medicineToDelete, setMedicineToDelete] = useState(null);
   const [consumptionState, setConsumptionState] = useState({}); // { medicineId_timeSlot: boolean }
@@ -113,6 +113,14 @@ const MedicineList = ({ selectedDate, handleOpenInfoModal }) => {
       setConsumptionState(prev => ({ ...prev, [key]: !newConsumed }));
     }
   };
+
+  if (loading) {
+    return (
+      <Box display="flex" justifyContent="center" alignItems="center" minHeight="200px">
+        <CircularProgress />
+      </Box>
+    );
+  }
 
   return (
     <div>
